@@ -1,3 +1,17 @@
+# Changes made
+
+This fork adds the following changes to the original project:
+- Added `-lo <LOCALOUT>` option: after saving hives on the remote target, the tool can download the saved `SAM`, `SYSTEM`, and `SECURITY` files from the target's admin share (C$) to a local output folder.
+- Implemented `DownloadHivesFromTarget()` which:
+  - Constructs UNC paths for remote saved hives (handles `C:\...` paths and UNC remote paths).
+  - Uses `WNetAddConnection2A` with the provided `-u`/`-p`/`-d` credentials to connect to `\\<target>\C$`.
+  - Copies files with `CopyFileA` and disconnects the session.
+- Improved error reporting (human-readable messages via `FormatMessageA`).
+- Attempts to enable required privileges (`SeBackupPrivilege` and `SeRestorePrivilege`) on the impersonation/process token.
+- Fixed Unicode/ANSI mismatch for privilege lookup (use of generic APIs).
+- Added network API include and link (`#include <winnetwk.h>` and `Mpr.lib`) for SMB connect/disconnect.
+- Notes: the `-lo` copy step requires the provided credentials to have access to `\\<target>\C$` (usually admin). If you cannot grant write access for the target machine account on a remote share, use the local-save + pull workflow described in the tool help.
+
 # From Backup Operator To Domain Admin
 
 If you compromise an account member of the group Backup Operators you can become the Domain Admin without RDP or WinRM on the Domain Controller.
